@@ -27,6 +27,7 @@
     <video controls id="video" src="/test/fixtures/size is relative.mp4" width="640" height="360"></video>
     <div id="current">0:00</div>
     <div id="duration">0:00</div>
+    <button>Cancel</button>
     <textarea id="story" name="story" rows="50" cols="130">
 Dialogue: Marked=0,0:00:00.886006,0:00:04.065144,DefaultVCD, NTP,0000,0000,0000,,{\pos(400,570)}OK. 这是地球与太阳的对比。很震撼，对吗？
     </textarea>
@@ -34,6 +35,11 @@ Dialogue: Marked=0,0:00:00.886006,0:00:04.065144,DefaultVCD, NTP,0000,0000,0000,
     <script src="dist/ass.js"></script>
     <script>
         $(document).ready(function () {
+            $('button').click(evt => {
+                const val = $('textarea').val()
+                const newVal = val.replace(/(.+)Dialogue.+/, '$1')
+                $('textarea').val(newVal)
+            })
             fetch('/foo.ass')
                 .then(res => res.text())
                 .then((text) => {
@@ -45,9 +51,9 @@ Dialogue: Marked=0,0:00:00.886006,0:00:04.065144,DefaultVCD, NTP,0000,0000,0000,
                         })
                         .on('pause', event => {
                             let str = $('textarea').val()
-                            str += getTimeStr(event.target.currentTime)
+                            str += getTimeStr(event.target.currentTime).replace(/\s+Dialogue/g, 'Dialogue')
                             $('textarea').val(str)
-                            localStorage = str
+                            localStorage.txt = str
                         })
                 });
             function onTrackedVideoFrame(currentTime, duration) {
