@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    <!-- <video id="video" src="/test/fixtures/size is relative.mp4"></video> -->
+    <!-- <video controls width="250">
+
+        <source src="/test/fixtures/size is relative.mp4" type="video/webm">
+
+
+        Sorry, your browser doesn't support embedded videos.
+    </video> -->
+    <video controls id="video" src="/test/fixtures/size is relative.mp4" width="640" height="360"></video>
+    <div id="current">0:00</div>
+    <div id="duration">0:00</div>
+    <textarea id="story" name="story" rows="50" cols="130">
+Dialogue: Marked=0,0:00:00.886006,0:00:04.065144,DefaultVCD, NTP,0000,0000,0000,,{\pos(400,570)}OK. 这是地球与太阳的对比。很震撼，对吗？
+    </textarea>
+    <script src="./node_modules/jquery/dist/jquery.js"></script>
+    <script src="dist/ass.js"></script>
+    <script>
+        $(document).ready(function () {
+            fetch('/foo.ass')
+                .then(res => res.text())
+                .then((text) => {
+                    const ass = new ASS(text, document.getElementById('video'));
+                    $("#video").on(
+                        "timeupdate",
+                        function (event) {
+                            onTrackedVideoFrame(this.currentTime, this.duration);
+                        })
+                        .on('pause', event => {
+                            let str = $('textarea').val()
+                            str += getTimeStr(event.target.currentTime)
+                            $('textarea').val(str)
+                            localStorage = str
+                        })
+                });
+            function onTrackedVideoFrame(currentTime, duration) {
+                $("#current").text(currentTime); //Change #current to currentTime
+                $("#duration").text(duration)
+                // navigator.clipboard.writeText($('#current').text()).then(data => {
+                //     debugger
+                // }).catch(err => {
+                //     debugger
+                // })
+            }
+        });
+
+        const getTimeStr = (seoncds) => {
+            const hourFormat = seoncds / 3600;
+            const hours = parseInt(hourFormat);
+            const minutesFormat = (hourFormat - hours) * 60;
+            const minutes = parseInt(minutesFormat);
+            const secondsFormat = (minutesFormat - minutes) * 60
+            const seconds = parseInt(secondsFormat)
+            const remaining = (secondsFormat - seconds + '').split('.')[1];
+            const template = `Dialogue: Marked=0,${hours}:${minutes}:${seconds}.${remaining}, ${hours}:${minutes}:${seconds + 1}.${remaining}, DefaultVCD, NTP, 0000, 0000, 0000,, { \pos(400,570) }`
+            return template;
+        }
+    </script>
+
+</body>
+
+</html>
